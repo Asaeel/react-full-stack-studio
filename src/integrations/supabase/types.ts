@@ -44,6 +44,253 @@ export type Database = {
         }
         Relationships: []
       }
+      funding_notifications: {
+        Row: {
+          body: string | null
+          created_at: string
+          id: string
+          kind: string | null
+          read: boolean
+          request_id: string
+          target_employee_id: string | null
+          target_manager_id: string | null
+          title: string | null
+        }
+        Insert: {
+          body?: string | null
+          created_at?: string
+          id?: string
+          kind?: string | null
+          read?: boolean
+          request_id: string
+          target_employee_id?: string | null
+          target_manager_id?: string | null
+          title?: string | null
+        }
+        Update: {
+          body?: string | null
+          created_at?: string
+          id?: string
+          kind?: string | null
+          read?: boolean
+          request_id?: string
+          target_employee_id?: string | null
+          target_manager_id?: string | null
+          title?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "funding_notifications_request_id_fkey"
+            columns: ["request_id"]
+            isOneToOne: false
+            referencedRelation: "funding_requests"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      funding_requests: {
+        Row: {
+          ai_message: string | null
+          amount: number
+          attachment_name: string | null
+          attachment_url: string | null
+          company_name: string
+          created_at: string
+          id: string
+          manager_id: string
+          manager_name: string | null
+          mode: string | null
+          reason: string | null
+          recipient_email: string | null
+          rejected_by_name: string | null
+          rejection_reason: string | null
+          repayment_period: string | null
+          request_date: string
+          status: string
+        }
+        Insert: {
+          ai_message?: string | null
+          amount?: number
+          attachment_name?: string | null
+          attachment_url?: string | null
+          company_name: string
+          created_at?: string
+          id?: string
+          manager_id: string
+          manager_name?: string | null
+          mode?: string | null
+          reason?: string | null
+          recipient_email?: string | null
+          rejected_by_name?: string | null
+          rejection_reason?: string | null
+          repayment_period?: string | null
+          request_date?: string
+          status?: string
+        }
+        Update: {
+          ai_message?: string | null
+          amount?: number
+          attachment_name?: string | null
+          attachment_url?: string | null
+          company_name?: string
+          created_at?: string
+          id?: string
+          manager_id?: string
+          manager_name?: string | null
+          mode?: string | null
+          reason?: string | null
+          recipient_email?: string | null
+          rejected_by_name?: string | null
+          rejection_reason?: string | null
+          repayment_period?: string | null
+          request_date?: string
+          status?: string
+        }
+        Relationships: []
+      }
+      funding_votes: {
+        Row: {
+          created_at: string
+          decision: string
+          id: string
+          request_id: string
+          voter_employee_id: string | null
+          voter_name: string | null
+        }
+        Insert: {
+          created_at?: string
+          decision: string
+          id?: string
+          request_id: string
+          voter_employee_id?: string | null
+          voter_name?: string | null
+        }
+        Update: {
+          created_at?: string
+          decision?: string
+          id?: string
+          request_id?: string
+          voter_employee_id?: string | null
+          voter_name?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "funding_votes_request_id_fkey"
+            columns: ["request_id"]
+            isOneToOne: false
+            referencedRelation: "funding_requests"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      meeting_attendees: {
+        Row: {
+          created_at: string
+          employee_id: string
+          id: string
+          meeting_id: string
+        }
+        Insert: {
+          created_at?: string
+          employee_id: string
+          id?: string
+          meeting_id: string
+        }
+        Update: {
+          created_at?: string
+          employee_id?: string
+          id?: string
+          meeting_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "meeting_attendees_employee_id_fkey"
+            columns: ["employee_id"]
+            isOneToOne: false
+            referencedRelation: "employees"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "meeting_attendees_meeting_id_fkey"
+            columns: ["meeting_id"]
+            isOneToOne: false
+            referencedRelation: "meetings"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      meetings: {
+        Row: {
+          completed: boolean
+          created_at: string
+          description: string | null
+          id: string
+          manager_id: string
+          meeting_date: string
+          meeting_time: string | null
+          priority: string
+          title: string
+        }
+        Insert: {
+          completed?: boolean
+          created_at?: string
+          description?: string | null
+          id?: string
+          manager_id: string
+          meeting_date: string
+          meeting_time?: string | null
+          priority?: string
+          title: string
+        }
+        Update: {
+          completed?: boolean
+          created_at?: string
+          description?: string | null
+          id?: string
+          manager_id?: string
+          meeting_date?: string
+          meeting_time?: string | null
+          priority?: string
+          title?: string
+        }
+        Relationships: []
+      }
+      notifications: {
+        Row: {
+          body: string | null
+          created_at: string
+          id: string
+          kind: string | null
+          read: boolean
+          recipient_type: string
+          task_id: string | null
+          title: string | null
+          user_id: string
+        }
+        Insert: {
+          body?: string | null
+          created_at?: string
+          id?: string
+          kind?: string | null
+          read?: boolean
+          recipient_type?: string
+          task_id?: string | null
+          title?: string | null
+          user_id: string
+        }
+        Update: {
+          body?: string | null
+          created_at?: string
+          id?: string
+          kind?: string | null
+          read?: boolean
+          recipient_type?: string
+          task_id?: string | null
+          title?: string | null
+          user_id?: string
+        }
+        Relationships: []
+      }
       profiles: {
         Row: {
           created_at: string
@@ -113,48 +360,116 @@ export type Database = {
         }
         Relationships: []
       }
+      task_files: {
+        Row: {
+          created_at: string
+          file_name: string
+          file_url: string
+          id: string
+          is_revision: boolean
+          task_id: string
+          uploaded_by: string | null
+          uploader_role: string | null
+        }
+        Insert: {
+          created_at?: string
+          file_name: string
+          file_url: string
+          id?: string
+          is_revision?: boolean
+          task_id: string
+          uploaded_by?: string | null
+          uploader_role?: string | null
+        }
+        Update: {
+          created_at?: string
+          file_name?: string
+          file_url?: string
+          id?: string
+          is_revision?: boolean
+          task_id?: string
+          uploaded_by?: string | null
+          uploader_role?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "task_files_task_id_fkey"
+            columns: ["task_id"]
+            isOneToOne: false
+            referencedRelation: "tasks"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       tasks: {
         Row: {
+          assigned_by: string | null
+          assigned_by_role: string | null
           completed_at: string | null
           created_at: string
           deadline: string | null
+          description: string | null
           employee_id: string
+          forwarded_to_owner: boolean
           id: string
           manager_id: string
           name: string
+          owner_status: string | null
+          parent_task_id: string | null
           priority: string
           project_name: string | null
+          revision_count: number
+          revision_note: string | null
           status: string
           submission_name: string | null
           submission_url: string | null
+          submitted_at: string | null
         }
         Insert: {
+          assigned_by?: string | null
+          assigned_by_role?: string | null
           completed_at?: string | null
           created_at?: string
           deadline?: string | null
+          description?: string | null
           employee_id: string
+          forwarded_to_owner?: boolean
           id?: string
           manager_id: string
           name: string
+          owner_status?: string | null
+          parent_task_id?: string | null
           priority?: string
           project_name?: string | null
+          revision_count?: number
+          revision_note?: string | null
           status?: string
           submission_name?: string | null
           submission_url?: string | null
+          submitted_at?: string | null
         }
         Update: {
+          assigned_by?: string | null
+          assigned_by_role?: string | null
           completed_at?: string | null
           created_at?: string
           deadline?: string | null
+          description?: string | null
           employee_id?: string
+          forwarded_to_owner?: boolean
           id?: string
           manager_id?: string
           name?: string
+          owner_status?: string | null
+          parent_task_id?: string | null
           priority?: string
           project_name?: string | null
+          revision_count?: number
+          revision_note?: string | null
           status?: string
           submission_name?: string | null
           submission_url?: string | null
+          submitted_at?: string | null
         }
         Relationships: [
           {
@@ -162,6 +477,13 @@ export type Database = {
             columns: ["employee_id"]
             isOneToOne: false
             referencedRelation: "employees"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "tasks_parent_task_id_fkey"
+            columns: ["parent_task_id"]
+            isOneToOne: false
+            referencedRelation: "tasks"
             referencedColumns: ["id"]
           },
         ]
