@@ -4,6 +4,7 @@ import { supabase as _s } from "@/integrations/supabase/client";
 const supabase: any = _s;
 import { encodeProjectName, decodeProjectName } from "@/lib/taskMeta";
 import { uploadToBucket } from "@/lib/storageUpload";
+import StarRating from "./StarRating";
 
 type Employee = { id?: string; name: string; email: string };
 type ProjectOpt = { name: string };
@@ -109,14 +110,26 @@ export default function ManagerTasks({
     })();
   }, [detail]);
 
-  const approveTask = async (t: RawTask) => {
+  const [ratingStars, setRatingStars] = useState(5);
+  const [showRating, setShowRating] = useState(false);
+
+  const approveTask = async (t: RawTask, stars: number) => {
     await supabase.from("tasks").update({ owner_status: "approved", status: "done", completed_at: new Date().toISOString() }).eq("id", t.id);
+    const ratee = t.assigned_by || t.employee_id;
+    const { data: { user } } = await supabase.auth.getUser();
+    if (user && ratee) {
+      await supabase.from("task_ratings").upsert({
+        task_id: t.id, ratee_id: ratee, rater_id: user.id,
+        rater_role: "owner", stars,
+      }, { onConflict: "task_id,rater_id" });
+    }
     if (t.assigned_by) {
       await supabase.from("notifications").insert({
         user_id: t.assigned_by, recipient_type: "employee", kind: "task_approved",
-        title: "Owner approved task", body: t.name, task_id: t.id,
+        title: "Owner approved task", body: `${t.name} — Rated ${stars}/5`, task_id: t.id,
       });
     }
+    setShowRating(false);
     setDetail(null);
     load();
   };
