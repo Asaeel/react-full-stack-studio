@@ -506,84 +506,86 @@ function EmployeePage() {
               <AdminTaskInbox admin={{ id: emp.id, name: emp.name, role: emp.role }} />
             )}
 
-            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-              <div ref={todoSectionRef} className="bg-white rounded-2xl p-6 shadow-sm">
-                <h3 className="font-bold text-[#333366] mb-4">To Do ({todo.length})</h3>
-                <div className="space-y-3">
-                  {todo.length === 0 && <p className="text-xs text-[#9197B3]">No pending tasks.</p>}
-                  {todo.map((t) => {
-                    const { project, description } = decodeProjectName(t.project_name);
-                    const isHighlighted = highlightedTaskId === t.id;
-                    const isRevision = t.status === "revision" || ((t.revision_count ?? 0) > 0 && t.status !== "done");
-                    const late = daysLate(t);
-                    const sinceAssigned = daysSinceAssigned(t);
-                    return (
-                      <div
-                        key={t.id}
-                        onClick={() => isHighlighted && setHighlightedTaskId(null)}
-                        className={`rounded-xl p-4 transition-all ${
-                          late > 0 ? "bg-red-50 border-2 border-red-400" :
-                          isRevision ? "bg-amber-50 border-2 border-amber-300" : "bg-[#F3F2F7]"
-                        } ${isHighlighted ? "ring-2 ring-red-500 border-2 border-red-500 shadow-md" : ""}`}
-                      >
-                        <div className="flex items-start justify-between gap-2">
-                          <div
-                            className="flex-1 min-w-0 cursor-pointer"
-                            onClick={(e) => { e.stopPropagation(); setDetail(t); }}
-                          >
-                            <div className="flex items-center gap-2 flex-wrap">
-                              <p className="font-bold text-[#333366]">{t.name}</p>
-                              {isRevision && (
-                                <span className="px-2 py-0.5 rounded-full bg-amber-500 text-white text-[9px] font-bold">
-                                  REVISION REQUESTED
-                                </span>
+            {!isAdmin && (
+              <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                <div ref={todoSectionRef} className="bg-white rounded-2xl p-6 shadow-sm">
+                  <h3 className="font-bold text-[#333366] mb-4">To Do ({todo.length})</h3>
+                  <div className="space-y-3">
+                    {todo.length === 0 && <p className="text-xs text-[#9197B3]">No pending tasks.</p>}
+                    {todo.map((t) => {
+                      const { project, description } = decodeProjectName(t.project_name);
+                      const isHighlighted = highlightedTaskId === t.id;
+                      const isRevision = t.status === "revision" || ((t.revision_count ?? 0) > 0 && t.status !== "done");
+                      const late = daysLate(t);
+                      const sinceAssigned = daysSinceAssigned(t);
+                      return (
+                        <div
+                          key={t.id}
+                          onClick={() => isHighlighted && setHighlightedTaskId(null)}
+                          className={`rounded-xl p-4 transition-all ${
+                            late > 0 ? "bg-red-50 border-2 border-red-400" :
+                            isRevision ? "bg-amber-50 border-2 border-amber-300" : "bg-[#F3F2F7]"
+                          } ${isHighlighted ? "ring-2 ring-red-500 border-2 border-red-500 shadow-md" : ""}`}
+                        >
+                          <div className="flex items-start justify-between gap-2">
+                            <div
+                              className="flex-1 min-w-0 cursor-pointer"
+                              onClick={(e) => { e.stopPropagation(); setDetail(t); }}
+                            >
+                              <div className="flex items-center gap-2 flex-wrap">
+                                <p className="font-bold text-[#333366]">{t.name}</p>
+                                {isRevision && (
+                                  <span className="px-2 py-0.5 rounded-full bg-amber-500 text-white text-[9px] font-bold">
+                                    REVISION REQUESTED
+                                  </span>
+                                )}
+                                {late > 0 && (
+                                  <span className="px-2 py-0.5 rounded-full bg-red-600 text-white text-[9px] font-bold inline-flex items-center gap-1">
+                                    <AlertTriangle size={10} /> LATE {late}d
+                                  </span>
+                                )}
+                              </div>
+                              <p className="text-[10px] text-[#9197B3]">{project || "—"} • Assigned {sinceAssigned}d ago • Due {t.deadline ?? "—"} • {t.priority}</p>
+                              {description && <p className="text-[11px] text-[#333366] mt-1 line-clamp-2">{description}</p>}
+                              {isRevision && t.revision_note && (
+                                <p className="text-[11px] mt-1 text-amber-800 bg-amber-100 rounded p-2">
+                                  <strong>Note:</strong> {t.revision_note}
+                                </p>
                               )}
-                              {late > 0 && (
-                                <span className="px-2 py-0.5 rounded-full bg-red-600 text-white text-[9px] font-bold inline-flex items-center gap-1">
-                                  <AlertTriangle size={10} /> LATE {late}d
-                                </span>
-                              )}
+                              {t.submission_name && <p className="text-[10px] mt-1 flex items-center gap-1 text-[#333366]"><Paperclip size={10} /> {t.submission_name}</p>}
                             </div>
-                            <p className="text-[10px] text-[#9197B3]">{project || "—"} • Assigned {sinceAssigned}d ago • Due {t.deadline ?? "—"} • {t.priority}</p>
-                            {description && <p className="text-[11px] text-[#333366] mt-1 line-clamp-2">{description}</p>}
-                            {isRevision && t.revision_note && (
-                              <p className="text-[11px] mt-1 text-amber-800 bg-amber-100 rounded p-2">
-                                <strong>Note:</strong> {t.revision_note}
-                              </p>
-                            )}
-                            {t.submission_name && <p className="text-[10px] mt-1 flex items-center gap-1 text-[#333366]"><Paperclip size={10} /> {t.submission_name}</p>}
+                            <button onClick={() => markDone(t)} title="Mark done" className="w-8 h-8 rounded-full bg-white border border-[#848FE1] flex items-center justify-center hover:bg-[#848FE1] hover:text-white shrink-0">
+                              <Check size={14} />
+                            </button>
                           </div>
-                          <button onClick={() => markDone(t)} title="Mark done" className="w-8 h-8 rounded-full bg-white border border-[#848FE1] flex items-center justify-center hover:bg-[#848FE1] hover:text-white shrink-0">
-                            <Check size={14} />
-                          </button>
+                          <label className="mt-2 inline-flex items-center gap-1 text-[10px] text-[#848FE1] cursor-pointer">
+                            <Paperclip size={10} /> Upload file
+                            <input type="file" className="hidden" onChange={(e) => e.target.files?.[0] && submitFile(t, e.target.files[0])} />
+                          </label>
                         </div>
-                        <label className="mt-2 inline-flex items-center gap-1 text-[10px] text-[#848FE1] cursor-pointer">
-                          <Paperclip size={10} /> Upload file
-                          <input type="file" className="hidden" onChange={(e) => e.target.files?.[0] && submitFile(t, e.target.files[0])} />
-                        </label>
-                      </div>
-                    );
-                  })}
+                      );
+                    })}
+                  </div>
                 </div>
-              </div>
 
-              <div className="bg-white rounded-2xl p-6 shadow-sm">
-                <h3 className="font-bold text-[#333366] mb-4">Done ({done.length})</h3>
-                <div className="space-y-3">
-                  {done.length === 0 && <p className="text-xs text-[#9197B3]">Nothing yet.</p>}
-                  {done.map((t) => {
-                    const { project } = decodeProjectName(t.project_name);
-                    return (
-                      <div key={t.id} onClick={() => setDetail(t)} className="bg-[#EAF7EE] rounded-xl p-4 cursor-pointer">
-                        <p className="font-bold text-[#333366] line-through opacity-70">{t.name}</p>
-                        <p className="text-[10px] text-[#9197B3]">{project || "—"}</p>
-                        {t.submission_name && <p className="text-[10px] mt-1 flex items-center gap-1 text-[#333366]"><Paperclip size={10} /> {t.submission_name}</p>}
-                      </div>
-                    );
-                  })}
+                <div className="bg-white rounded-2xl p-6 shadow-sm">
+                  <h3 className="font-bold text-[#333366] mb-4">Done ({done.length})</h3>
+                  <div className="space-y-3">
+                    {done.length === 0 && <p className="text-xs text-[#9197B3]">Nothing yet.</p>}
+                    {done.map((t) => {
+                      const { project } = decodeProjectName(t.project_name);
+                      return (
+                        <div key={t.id} onClick={() => setDetail(t)} className="bg-[#EAF7EE] rounded-xl p-4 cursor-pointer">
+                          <p className="font-bold text-[#333366] line-through opacity-70">{t.name}</p>
+                          <p className="text-[10px] text-[#9197B3]">{project || "—"}</p>
+                          {t.submission_name && <p className="text-[10px] mt-1 flex items-center gap-1 text-[#333366]"><Paperclip size={10} /> {t.submission_name}</p>}
+                        </div>
+                      );
+                    })}
+                  </div>
                 </div>
               </div>
-            </div>
+            )}
           </>
         )}
 
