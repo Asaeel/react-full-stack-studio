@@ -595,12 +595,6 @@ function IndexPage() {
         { name: "Risk Agent", desc: "Reminders & early payment Discount - suggested action" }
       ];
 
-      const team = [
-        { name: "Sara Ali", role: "UI/UX Designer", status: "Available", color: "bg-green-500" },
-        { name: "Omar Fahad", role: "UI/UX Designer", status: "Busy", color: "bg-orange-400" },
-        { name: "Reem Ahmed", role: "UI/UX Designer", status: "Unavailable", color: "bg-red-500" },
-        { name: "Jood Abdullah", role: "UI/UX Designer", status: "Now working", color: "bg-blue-400" }
-      ];
 
       return (
         <div className="flex flex-col gap-8 w-full animate-in fade-in slide-in-from-bottom-4 duration-500 pb-20">
