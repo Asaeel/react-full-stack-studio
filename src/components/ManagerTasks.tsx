@@ -440,10 +440,19 @@ export default function ManagerTasks({
                 )}
                 {detail.forwarded_to_owner && detail.owner_status !== "approved" && (
                   <div className="mt-3 pt-3 border-t border-[#DADCF5]">
-                    {reviewMode === "none" ? (
+                    {reviewMode === "none" && !showRating ? (
                       <div className="flex gap-2">
-                        <button onClick={() => approveTask(detail)} className="px-4 h-10 rounded-lg bg-green-600 text-white text-xs font-bold flex items-center gap-1"><Check size={14}/> Approve</button>
+                        <button onClick={() => { setShowRating(true); setRatingStars(5); }} className="px-4 h-10 rounded-lg bg-green-600 text-white text-xs font-bold flex items-center gap-1"><Check size={14}/> Approve</button>
                         <button onClick={() => setReviewMode("revise")} className="px-4 h-10 rounded-lg bg-amber-500 text-white text-xs font-bold flex items-center gap-1"><AlertTriangle size={14}/> Request revision</button>
+                      </div>
+                    ) : showRating ? (
+                      <div className="space-y-3">
+                        <p className="text-xs font-bold text-[#333366]">Rate this work (out of 5)</p>
+                        <div className="flex justify-center"><StarRating value={ratingStars} onChange={setRatingStars} size={26} /></div>
+                        <div className="flex justify-end gap-2">
+                          <button onClick={() => setShowRating(false)} className="px-4 h-9 rounded-[8px] border border-[#DADCF5] text-xs">Cancel</button>
+                          <button onClick={() => approveTask(detail, ratingStars)} className="px-4 h-9 rounded-[8px] bg-green-600 text-white text-xs font-bold">Confirm & Approve</button>
+                        </div>
                       </div>
                     ) : (
                       <div className="space-y-2">
