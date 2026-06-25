@@ -22,6 +22,7 @@ export type Database = {
           manager_id: string
           name: string
           permissions: string | null
+          position: string | null
           role: string | null
         }
         Insert: {
@@ -31,6 +32,7 @@ export type Database = {
           manager_id: string
           name: string
           permissions?: string | null
+          position?: string | null
           role?: string | null
         }
         Update: {
@@ -40,6 +42,7 @@ export type Database = {
           manager_id?: string
           name?: string
           permissions?: string | null
+          position?: string | null
           role?: string | null
         }
         Relationships: []
@@ -400,6 +403,39 @@ export type Database = {
             referencedColumns: ["id"]
           },
         ]
+      }
+      task_ratings: {
+        Row: {
+          created_at: string
+          id: string
+          note: string | null
+          ratee_id: string
+          rater_id: string
+          rater_role: string
+          stars: number
+          task_id: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          note?: string | null
+          ratee_id: string
+          rater_id: string
+          rater_role?: string
+          stars: number
+          task_id: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          note?: string | null
+          ratee_id?: string
+          rater_id?: string
+          rater_role?: string
+          stars?: number
+          task_id?: string
+        }
+        Relationships: []
       }
       tasks: {
         Row: {

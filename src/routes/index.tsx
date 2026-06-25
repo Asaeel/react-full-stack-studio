@@ -6,6 +6,7 @@ import ManagerTasks from "@/components/ManagerTasks";
 import MeetingsCalendar from "@/components/MeetingsCalendar";
 import FundingRequestsPanel from "@/components/FundingRequestsPanel";
 import MeetingsQuickPanel from "@/components/MeetingsQuickPanel";
+import TeamMembersCard from "@/components/TeamMembersCard";
 import { supabase as _supabaseTyped } from "@/integrations/supabase/client";
 const supabase: any = _supabaseTyped;
 import { 
@@ -594,12 +595,6 @@ function IndexPage() {
         { name: "Risk Agent", desc: "Reminders & early payment Discount - suggested action" }
       ];
 
-      const team = [
-        { name: "Sara Ali", role: "UI/UX Designer", status: "Available", color: "bg-green-500" },
-        { name: "Omar Fahad", role: "UI/UX Designer", status: "Busy", color: "bg-orange-400" },
-        { name: "Reem Ahmed", role: "UI/UX Designer", status: "Unavailable", color: "bg-red-500" },
-        { name: "Jood Abdullah", role: "UI/UX Designer", status: "Now working", color: "bg-blue-400" }
-      ];
 
       return (
         <div className="flex flex-col gap-8 w-full animate-in fade-in slide-in-from-bottom-4 duration-500 pb-20">
@@ -625,31 +620,9 @@ function IndexPage() {
               <ManagerTasks employees={members} projects={projects} notify={notify} search={searchQ} highlightId={highlightTaskId} />
 
               {/* Team Members Card */}
-              <div className="bg-white rounded-[32px] p-8 shadow-sm border border-[#DADCF5]/50">
-                <h2 className="text-3xl font-hind font-bold text-[#333366] mb-8">Team Members</h2>
-                <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-                  {team.map((member, i) => (
-                    <div key={i} className="bg-[#F3F2F7] rounded-[20px] p-4 border border-white shadow-sm">
-                      <h4 className="text-sm font-bold text-[#333366] mb-0.5">{member.name}</h4>
-                      <p className="text-[8px] text-[#9197B3] mb-3">{member.role}</p>
-                      <p className="text-[8px] text-[#9197B3] mb-2">Current Task</p>
-                      <div className="flex items-center gap-1.5 mb-3">
-                        <div className={`w-1.5 h-1.5 rounded-full ${member.color}`} />
-                        <span className="text-[8px] font-medium text-[#333366]">{member.status}</span>
-                      </div>
-                      <div className="space-y-1">
-                        <div className="flex justify-between items-center text-[7px] font-bold text-[#333366]">
-                          <span>92% Performance</span>
-                        </div>
-                        <div className="h-1 bg-[#DADCF5] rounded-full overflow-hidden">
-                          <div className="h-full bg-[#3F467F] w-[92%]" />
-                        </div>
-                      </div>
-                    </div>
-                  ))}
-                </div>
-              </div>
+              <TeamMembersCard members={members} />
             </div>
+
 
             <div className="xl:col-span-4 flex flex-col gap-8">
               {/* Calendar Widget */}

@@ -3,6 +3,7 @@ import { Send, AlertTriangle, Paperclip, GitBranch, ArrowUp, X, FileText, Downlo
 import { supabase as _s } from "@/integrations/supabase/client";
 import { uploadToBucket } from "@/lib/storageUpload";
 import TaskDistributeWizard from "./TaskDistributeWizard";
+import StarRating from "./StarRating";
 const supabase: any = _s;
 
 type Task = {
@@ -142,12 +143,20 @@ export default function AdminTaskInbox({
     setReviewKid(null); setRevisionNote(""); setRevisionFile(null); load();
   };
 
-  const approveKid = async (k: Task) => {
+  const [ratingKid, setRatingKid] = useState<Task | null>(null);
+  const [ratingStars, setRatingStars] = useState(5);
+
+  const approveKid = async (k: Task, stars: number) => {
     await supabase.from("tasks").update({ status: "done", completed_at: new Date().toISOString() }).eq("id", k.id);
+    await supabase.from("task_ratings").upsert({
+      task_id: k.id, ratee_id: k.employee_id, rater_id: admin.id,
+      rater_role: "manager", stars,
+    }, { onConflict: "task_id,rater_id" });
     await supabase.from("notifications").insert({
       user_id: k.employee_id, recipient_type: "employee",
-      kind: "task_approved", title: "Subtask approved", body: k.name, task_id: k.id,
+      kind: "task_approved", title: "Subtask approved", body: `${k.name} — Rated ${stars}/5`, task_id: k.id,
     });
+    setRatingKid(null); setRatingStars(5);
     load();
   };
 
@@ -243,7 +252,7 @@ export default function AdminTaskInbox({
                             </div>
                             {(k.status === "done" || k.submission_name || kfiles.some(f => f.uploader_role === "editor")) && (
                               <div className="flex flex-col gap-1">
-                                <button onClick={() => approveKid(k)} className="px-2 h-7 rounded bg-green-600 text-white text-[10px] font-bold">Approve</button>
+                                <button onClick={() => { setRatingKid(k); setRatingStars(5); }} className="px-2 h-7 rounded bg-green-600 text-white text-[10px] font-bold">Approve</button>
                                 <button onClick={() => { setReviewKid(k); setRevisionNote(""); setRevisionFile(null); }} className="px-2 h-7 rounded bg-amber-100 text-amber-800 text-[10px] font-bold flex items-center gap-1"><AlertTriangle size={10}/>Revise</button>
                               </div>
                             )}
@@ -312,6 +321,20 @@ export default function AdminTaskInbox({
             <div className="flex justify-end gap-2 mt-4">
               <button onClick={() => setReviewKid(null)} className="px-4 h-9 rounded-[8px] border border-[#DADCF5] text-xs">Cancel</button>
               <button disabled={!revisionNote.trim()} onClick={requestRevision} className="px-4 h-9 rounded-[8px] bg-amber-600 text-white text-xs font-bold disabled:opacity-50 flex items-center gap-1"><Send size={12}/> Send</button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {ratingKid && (
+        <div className="fixed inset-0 bg-black/50 z-[60] flex items-center justify-center p-4" onClick={() => setRatingKid(null)}>
+          <div onClick={(e) => e.stopPropagation()} className="bg-white rounded-[20px] w-full max-w-sm p-6 shadow-2xl text-center">
+            <h3 className="text-lg font-bold text-[#333366] mb-2">Rate this work</h3>
+            <p className="text-xs text-[#9197B3] mb-4">How would you rate "{ratingKid.name}"?</p>
+            <div className="flex justify-center mb-5"><StarRating value={ratingStars} onChange={setRatingStars} size={28} /></div>
+            <div className="flex gap-2">
+              <button onClick={() => setRatingKid(null)} className="flex-1 h-10 rounded-[8px] border border-[#DADCF5] text-xs font-bold text-[#333366]">Cancel</button>
+              <button onClick={() => approveKid(ratingKid, ratingStars)} className="flex-1 h-10 rounded-[8px] bg-green-600 text-white text-xs font-bold">Approve</button>
             </div>
           </div>
         </div>
