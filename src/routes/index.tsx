@@ -6,6 +6,7 @@ import ManagerTasks from "@/components/ManagerTasks";
 import MeetingsCalendar from "@/components/MeetingsCalendar";
 import FundingRequestsPanel from "@/components/FundingRequestsPanel";
 import MeetingsQuickPanel from "@/components/MeetingsQuickPanel";
+import TeamMembersCard from "@/components/TeamMembersCard";
 import { supabase as _supabaseTyped } from "@/integrations/supabase/client";
 const supabase: any = _supabaseTyped;
 import { 
