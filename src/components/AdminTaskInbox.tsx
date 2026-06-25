@@ -3,6 +3,7 @@ import { Send, AlertTriangle, Paperclip, GitBranch, ArrowUp, X, FileText, Downlo
 import { supabase as _s } from "@/integrations/supabase/client";
 import { uploadToBucket } from "@/lib/storageUpload";
 import TaskDistributeWizard from "./TaskDistributeWizard";
+import StarRating from "./StarRating";
 const supabase: any = _s;
 
 type Task = {
@@ -142,12 +143,20 @@ export default function AdminTaskInbox({
     setReviewKid(null); setRevisionNote(""); setRevisionFile(null); load();
   };
 
-  const approveKid = async (k: Task) => {
+  const [ratingKid, setRatingKid] = useState<Task | null>(null);
+  const [ratingStars, setRatingStars] = useState(5);
+
+  const approveKid = async (k: Task, stars: number) => {
     await supabase.from("tasks").update({ status: "done", completed_at: new Date().toISOString() }).eq("id", k.id);
+    await supabase.from("task_ratings").upsert({
+      task_id: k.id, ratee_id: k.employee_id, rater_id: admin.id,
+      rater_role: "manager", stars,
+    }, { onConflict: "task_id,rater_id" });
     await supabase.from("notifications").insert({
       user_id: k.employee_id, recipient_type: "employee",
-      kind: "task_approved", title: "Subtask approved", body: k.name, task_id: k.id,
+      kind: "task_approved", title: "Subtask approved", body: `${k.name} — Rated ${stars}/5`, task_id: k.id,
     });
+    setRatingKid(null); setRatingStars(5);
     load();
   };
 
