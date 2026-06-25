@@ -14,7 +14,158 @@ export type Database = {
   }
   public: {
     Tables: {
-      [_ in never]: never
+      employees: {
+        Row: {
+          created_at: string
+          email: string
+          id: string
+          manager_id: string
+          name: string
+          permissions: string | null
+          role: string | null
+        }
+        Insert: {
+          created_at?: string
+          email: string
+          id?: string
+          manager_id: string
+          name: string
+          permissions?: string | null
+          role?: string | null
+        }
+        Update: {
+          created_at?: string
+          email?: string
+          id?: string
+          manager_id?: string
+          name?: string
+          permissions?: string | null
+          role?: string | null
+        }
+        Relationships: []
+      }
+      profiles: {
+        Row: {
+          created_at: string
+          full_name: string | null
+          id: string
+          updated_at: string
+          username: string | null
+        }
+        Insert: {
+          created_at?: string
+          full_name?: string | null
+          id: string
+          updated_at?: string
+          username?: string | null
+        }
+        Update: {
+          created_at?: string
+          full_name?: string | null
+          id?: string
+          updated_at?: string
+          username?: string | null
+        }
+        Relationships: []
+      }
+      projects: {
+        Row: {
+          budget: string | null
+          created_at: string
+          description: string | null
+          employees: string | null
+          id: string
+          industry: string | null
+          manager_id: string
+          name: string
+          stage: string | null
+          timeline: string | null
+          type: string | null
+          updated_at: string
+        }
+        Insert: {
+          budget?: string | null
+          created_at?: string
+          description?: string | null
+          employees?: string | null
+          id?: string
+          industry?: string | null
+          manager_id: string
+          name: string
+          stage?: string | null
+          timeline?: string | null
+          type?: string | null
+          updated_at?: string
+        }
+        Update: {
+          budget?: string | null
+          created_at?: string
+          description?: string | null
+          employees?: string | null
+          id?: string
+          industry?: string | null
+          manager_id?: string
+          name?: string
+          stage?: string | null
+          timeline?: string | null
+          type?: string | null
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      tasks: {
+        Row: {
+          completed_at: string | null
+          created_at: string
+          deadline: string | null
+          employee_id: string
+          id: string
+          manager_id: string
+          name: string
+          priority: string
+          project_name: string | null
+          status: string
+          submission_name: string | null
+          submission_url: string | null
+        }
+        Insert: {
+          completed_at?: string | null
+          created_at?: string
+          deadline?: string | null
+          employee_id: string
+          id?: string
+          manager_id: string
+          name: string
+          priority?: string
+          project_name?: string | null
+          status?: string
+          submission_name?: string | null
+          submission_url?: string | null
+        }
+        Update: {
+          completed_at?: string | null
+          created_at?: string
+          deadline?: string | null
+          employee_id?: string
+          id?: string
+          manager_id?: string
+          name?: string
+          priority?: string
+          project_name?: string | null
+          status?: string
+          submission_name?: string | null
+          submission_url?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "tasks_employee_id_fkey"
+            columns: ["employee_id"]
+            isOneToOne: false
+            referencedRelation: "employees"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
     }
     Views: {
       [_ in never]: never
