@@ -199,11 +199,72 @@ export default function ManagerTasks({
     return [t.name, project, description, empName(t.employee_id), t.priority].some((s) => (s ?? "").toLowerCase().includes(q));
   };
 
-  const todo = tasks.filter((t) => t.status !== "done").filter(matches);
-  const done = tasks.filter((t) => t.status === "done").filter(matches);
+  // Three buckets:
+  //  - sent:     forwarded/pending — assignee hasn't completed yet
+  //  - awaiting: completed by assignee, waiting for manager review
+  //  - reviewed: manager approved (done)
+  const sent = tasks.filter((t) => t.status !== "done" && (t.owner_status ?? "pending") !== "approved" && t.status !== "completed_by_employee").filter(matches);
+  const awaiting = tasks.filter((t) => (t.status === "completed_by_employee" || t.owner_status === "awaiting_review") && t.status !== "done").filter(matches);
+  const reviewed = tasks.filter((t) => t.status === "done" || t.owner_status === "approved").filter(matches);
 
   const highlightCls = (id: string) =>
     highlightId === id ? "ring-4 ring-[#FFD36E] ring-offset-2" : "";
+
+  const today = new Date();
+  const daysLate = (t: RawTask): number => {
+    if (!t.deadline || t.status === "done") return 0;
+    const d = new Date(t.deadline);
+    const diff = Math.floor((today.getTime() - d.getTime()) / 86400000);
+    return diff > 0 ? diff : 0;
+  };
+  const execDurationDays = (t: RawTask): number | null => {
+    if (!t.completed_at) return null;
+    const c = new Date(t.completed_at).getTime();
+    const s = new Date(t.created_at).getTime();
+    return Math.max(0, Math.floor((c - s) / 86400000));
+  };
+
+  const renderCard = (t: RawTask, tone: "sent" | "awaiting" | "reviewed") => {
+    const { project, description } = decodeProjectName(t.project_name);
+    const late = daysLate(t);
+    const dur = execDurationDays(t);
+    const base =
+      tone === "reviewed" ? "bg-[#EAF7EE]" :
+      tone === "awaiting" ? "bg-[#FFF6E5] border border-[#F7C77A]" :
+      late > 0 ? "bg-red-50 border-2 border-red-400" : "bg-[#F3F2F7]";
+    return (
+      <div
+        key={t.id}
+        ref={highlightId === t.id ? highlightRef : null}
+        onClick={() => setDetail(t)}
+        className={`${base} rounded-[15px] p-4 border-white shadow-sm hover:border-[#848FE1] transition-all cursor-pointer ${highlightCls(t.id)}`}
+      >
+        <div className="flex items-start justify-between gap-2">
+          <div className="min-w-0 flex-1">
+            <div className="flex items-center gap-2 flex-wrap">
+              <h4 className={`font-bold text-[#333366] ${tone === "reviewed" ? "line-through opacity-70" : ""}`}>{t.name}</h4>
+              {late > 0 && tone !== "reviewed" && (
+                <span className="px-2 py-0.5 rounded-full bg-red-600 text-white text-[9px] font-bold inline-flex items-center gap-1">
+                  <AlertTriangle size={10} /> LATE {late}d
+                </span>
+              )}
+            </div>
+            <p className="text-[10px] text-[#9197B3] mt-0.5">
+              {empName(t.employee_id)} • {project || "—"} • Due {t.deadline ?? "—"} • {t.priority}
+            </p>
+            {tone !== "sent" && t.completed_at && (
+              <p className="text-[10px] text-[#9197B3]">
+                Delivered {new Date(t.completed_at).toLocaleDateString()}
+                {dur !== null && ` • took ${dur}d`}
+              </p>
+            )}
+            {description && <p className="text-[11px] text-[#333366] mt-1 line-clamp-2">{description}</p>}
+          </div>
+          {tone === "reviewed" && <Check size={18} className="text-green-600 shrink-0" />}
+        </div>
+      </div>
+    );
+  };
 
   return (
     <div id="manager-tasks-section" className="bg-white rounded-[32px] p-8 shadow-sm border border-[#DADCF5]/50">
@@ -214,72 +275,41 @@ export default function ManagerTasks({
         </button>
       </div>
 
-      <div className="space-y-6">
-        <h3 className="text-xl font-hind font-bold text-[#333366]">To Do</h3>
-        <div className="space-y-4">
-          {todo.length === 0 && <p className="text-xs text-[#9197B3]">No tasks.</p>}
-          {todo.map((t) => {
-            const { project, description } = decodeProjectName(t.project_name);
-            return (
-              <div
-                key={t.id}
-                ref={highlightId === t.id ? highlightRef : null}
-                onClick={() => setDetail(t)}
-                className={`bg-[#F3F2F7] rounded-[15px] p-5 border border-white shadow-sm hover:border-[#848FE1] transition-all cursor-pointer ${highlightCls(t.id)}`}
-              >
-                <div className="flex items-start justify-between gap-2">
-                  <div className="min-w-0">
-                    <h4 className="font-bold text-[#333366] mb-1">{t.name}</h4>
-                    <p className="text-[10px] text-[#9197B3]">
-                      {empName(t.employee_id)} • {project || "—"} • Due {t.deadline ?? "—"} • {t.priority}
-                    </p>
-                    {description && <p className="text-[11px] text-[#333366] mt-1 line-clamp-2">{description}</p>}
-                  </div>
-                </div>
-              </div>
-            );
-          })}
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-5">
+        <div>
+          <h3 className="text-base font-hind font-bold text-[#333366] mb-3 flex items-center gap-2">
+            <Send size={14} className="text-[#727FE5]" /> Sent — Not Executed
+            <span className="text-[10px] text-[#9197B3]">({sent.length})</span>
+          </h3>
+          <div className="space-y-3">
+            {sent.length === 0 && <p className="text-xs text-[#9197B3]">Nothing here.</p>}
+            {sent.map((t) => renderCard(t, "sent"))}
+          </div>
         </div>
 
-        {done.length > 0 && (
-          <>
-            <h3 className="text-xl font-hind font-bold text-[#333366] pt-4">Done</h3>
-            <div className="space-y-4">
-              {done.map((t) => {
-                const { project } = decodeProjectName(t.project_name);
-                return (
-                  <div
-                    key={t.id}
-                    ref={highlightId === t.id ? highlightRef : null}
-                    onClick={() => setDetail(t)}
-                    className={`bg-[#EAF7EE] rounded-[15px] p-5 border border-white shadow-sm cursor-pointer ${highlightCls(t.id)}`}
-                  >
-                    <div className="flex items-start justify-between gap-2">
-                      <div>
-                        <h4 className="font-bold text-[#333366] mb-1 line-through opacity-70">{t.name}</h4>
-                        <p className="text-[10px] text-[#9197B3]">{empName(t.employee_id)} • {project || "—"} • Completed</p>
-                        {t.submission_name && (
-                          <a
-                            href={t.submission_url ?? "#"}
-                            target={t.submission_url ? "_blank" : undefined}
-                            download={t.submission_url ? t.submission_name : undefined}
-                            rel="noreferrer"
-                            onClick={(e) => e.stopPropagation()}
-                            className="text-[11px] text-[#727FE5] mt-1 flex items-center gap-1 hover:underline"
-                          >
-                            <Paperclip size={11} /> {t.submission_name} {t.submission_url ? "↓" : ""}
-                          </a>
-                        )}
-                      </div>
-                      <Check size={18} className="text-green-600" />
-                    </div>
-                  </div>
-                );
-              })}
-            </div>
-          </>
-        )}
+        <div>
+          <h3 className="text-base font-hind font-bold text-[#333366] mb-3 flex items-center gap-2">
+            <FileText size={14} className="text-[#E0A852]" /> Executed — Awaiting Review
+            <span className="text-[10px] text-[#9197B3]">({awaiting.length})</span>
+          </h3>
+          <div className="space-y-3">
+            {awaiting.length === 0 && <p className="text-xs text-[#9197B3]">Nothing here.</p>}
+            {awaiting.map((t) => renderCard(t, "awaiting"))}
+          </div>
+        </div>
+
+        <div>
+          <h3 className="text-base font-hind font-bold text-[#333366] mb-3 flex items-center gap-2">
+            <Check size={14} className="text-green-600" /> Reviewed & Approved
+            <span className="text-[10px] text-[#9197B3]">({reviewed.length})</span>
+          </h3>
+          <div className="space-y-3">
+            {reviewed.length === 0 && <p className="text-xs text-[#9197B3]">Nothing here.</p>}
+            {reviewed.map((t) => renderCard(t, "reviewed"))}
+          </div>
+        </div>
       </div>
+
 
       {showModal && (
         <div className="fixed inset-0 bg-black/40 z-50 flex items-center justify-center p-4" onClick={() => setShowModal(false)}>
