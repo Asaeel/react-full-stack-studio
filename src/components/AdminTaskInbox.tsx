@@ -325,6 +325,20 @@ export default function AdminTaskInbox({
           </div>
         </div>
       )}
+
+      {ratingKid && (
+        <div className="fixed inset-0 bg-black/50 z-[60] flex items-center justify-center p-4" onClick={() => setRatingKid(null)}>
+          <div onClick={(e) => e.stopPropagation()} className="bg-white rounded-[20px] w-full max-w-sm p-6 shadow-2xl text-center">
+            <h3 className="text-lg font-bold text-[#333366] mb-2">Rate this work</h3>
+            <p className="text-xs text-[#9197B3] mb-4">How would you rate "{ratingKid.name}"?</p>
+            <div className="flex justify-center mb-5"><StarRating value={ratingStars} onChange={setRatingStars} size={28} /></div>
+            <div className="flex gap-2">
+              <button onClick={() => setRatingKid(null)} className="flex-1 h-10 rounded-[8px] border border-[#DADCF5] text-xs font-bold text-[#333366]">Cancel</button>
+              <button onClick={() => approveKid(ratingKid, ratingStars)} className="flex-1 h-10 rounded-[8px] bg-green-600 text-white text-xs font-bold">Approve</button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
