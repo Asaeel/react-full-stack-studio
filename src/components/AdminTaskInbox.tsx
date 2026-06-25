@@ -252,7 +252,7 @@ export default function AdminTaskInbox({
                             </div>
                             {(k.status === "done" || k.submission_name || kfiles.some(f => f.uploader_role === "editor")) && (
                               <div className="flex flex-col gap-1">
-                                <button onClick={() => approveKid(k)} className="px-2 h-7 rounded bg-green-600 text-white text-[10px] font-bold">Approve</button>
+                                <button onClick={() => { setRatingKid(k); setRatingStars(5); }} className="px-2 h-7 rounded bg-green-600 text-white text-[10px] font-bold">Approve</button>
                                 <button onClick={() => { setReviewKid(k); setRevisionNote(""); setRevisionFile(null); }} className="px-2 h-7 rounded bg-amber-100 text-amber-800 text-[10px] font-bold flex items-center gap-1"><AlertTriangle size={10}/>Revise</button>
                               </div>
                             )}
